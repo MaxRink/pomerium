@@ -135,6 +135,11 @@ func runReporter(
 	client pb.RegistryClient,
 	services []*pb.Service,
 ) {
+	// The reporter outlives the span of the configuration update that started
+	// it. Drop that span so each Report starts its own trace instead of
+	// growing the update's trace forever.
+	ctx = oteltrace.ContextWithSpanContext(ctx, oteltrace.SpanContext{})
+
 	backoff := backoff.NewExponentialBackOff()
 	backoff.MaxElapsedTime = 0
 
